@@ -87,24 +87,15 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import google.generativeai as genai
 from pymongo import MongoClient
-
-# -----------------------------
-# Configure Gemini LLM
-# -----------------------------
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 chat_model = genai.GenerativeModel("gemini-2.5-pro")
 
-# -----------------------------
-# MongoDB connection
-# -----------------------------
 MONGO_URI = "mongodb+srv://shrbaj23_db_user:qdZMAT5HJWdmjzMH@cluster0.a1wephx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 client = MongoClient(MONGO_URI)
 db = client["medical_chat"]
 collection = db["documents"]
 
-# -----------------------------
-# Function: Load dataset from MongoDB
-# -----------------------------
+
 def load_dataset_from_mongo():
     data_docs = list(collection.find({}))
     if not data_docs:
@@ -119,8 +110,7 @@ def load_dataset_from_mongo():
             labels.append(content_dict["Label"])
         except Exception as e:
             print(f"Skipping document due to parsing error: {e}")
-    
-    # Map dataset labels to severity levels
+
     def map_label_to_severity(label):
         label = label.lower()
         if label in ["normal"]:
@@ -134,9 +124,7 @@ def load_dataset_from_mongo():
 
     return texts, severities
 
-# -----------------------------
-# Function: Create FAISS vector store
-# -----------------------------
+
 def create_vector_store(texts):
     model_embed = SentenceTransformer("all-MiniLM-L6-v2")
     embeddings = model_embed.encode(texts)
@@ -145,9 +133,7 @@ def create_vector_store(texts):
     index.add(embeddings)
     return index, embeddings
 
-# -----------------------------
-# Function: Query with context and Gemini LLM
-# -----------------------------
+
 def query_with_context(user_input, index, texts, severities, top_k=3):
     model_embed = SentenceTransformer("all-MiniLM-L6-v2")
     query_embedding = model_embed.encode([user_input])
@@ -156,11 +142,10 @@ def query_with_context(user_input, index, texts, severities, top_k=3):
     relevant_texts = [texts[i] for i in I[0]]
     relevant_severities = [severities[i] for i in I[0]]
 
-    # Determine majority severity
+  
     severity_count = Counter(relevant_severities)
     majority_severity = severity_count.most_common(1)[0][0]
 
-    # Prompt for Gemini
     prompt = f"""
 User described symptoms: {user_input}
 
@@ -175,3 +160,4 @@ Answer in a friendly, supportive tone.
 """
     response = chat_model.generate_content(prompt)
     return response.text, majority_severity
+

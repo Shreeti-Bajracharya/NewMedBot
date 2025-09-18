@@ -152,13 +152,13 @@ body, html {
 
 .user_info span {
   font-size: 20px;
-  color: white; /* High contrast navy */
+  color: white; 
   font-weight: bold;
 }
 
 .user_info p {
   font-size: 12px;
-  color: whitesmoke; /* Secondary blue */
+  color: whitesmoke; 
 }
 
 

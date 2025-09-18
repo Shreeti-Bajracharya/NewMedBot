@@ -90,11 +90,9 @@ from document_chat import load_dataset_from_mongo, create_vector_store, query_wi
 
 app = Flask(__name__)
 
-# Load Gemini API key
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Load MongoDB dataset and build embeddings at startup
 docs, severities = load_dataset_from_mongo()
 if docs:
     index, embeddings = create_vector_store(docs)
@@ -103,12 +101,11 @@ else:
     index, embeddings = None, None
     print("❌ No documents found in MongoDB")
 
-# Render chat UI
 @app.route("/")
 def index_page():
     return render_template("chat.html")
 
-# Handle user message
+
 @app.route("/get", methods=["POST"])
 def get_bot_response():
     user_msg = request.form["msg"]
@@ -120,3 +117,6 @@ def get_bot_response():
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
+ 
+
+
